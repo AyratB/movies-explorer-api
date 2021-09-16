@@ -51,25 +51,12 @@ module.exports.updateUserData = (req, res, next) => {
     });
 };
 
-
-// signup
+// регистрация пользователя
 module.exports.createUser = (req, res, next) => {
-  const {
-    name,
-    about,
-    avatar,
-    email,
-    password,
-  } = req.body;
+  const { email, password, name } = req.body;
 
   bcrypt.hash(password, 10)
-    .then((hash) => User.create({
-      name,
-      about,
-      avatar,
-      email,
-      password: hash,
-    }))
+    .then((hash) => User.create({ email, password: hash, name }))
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -82,7 +69,7 @@ module.exports.createUser = (req, res, next) => {
     });
 };
 
-// signin
+// вход
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 

@@ -55,7 +55,6 @@ router.delete('/:movieId ', celebrate({
   }),
 }), deleteMovie);
 
-
 // router.put('/:cardId/likes', celebrate({
 //   params: Joi.object().keys({
 //     cardId: Joi.string().hex().length(24),
