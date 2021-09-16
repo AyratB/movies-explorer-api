@@ -1,48 +1,86 @@
-const Card = require('../models/card');
+const Movie = require('../models/movie');
 
 const UncorrectDataError = require('../errors/uncorrect_data_err');
 const NotFoundError = require('../errors/not_found_err');
 const DefaultError = require('../errors/default-err');
 const ForbiddenError = require('../errors/forbidden_err');
 
-module.exports.getCards = (req, res, next) => {
-  Card.find({})
+module.exports.getMovies = (req, res, next) => {
+  Movie.find({})
     .then((cards) => res.status(200).send({ data: cards }))
-    .catch((err) => next(err.name === 'ValidationError' ? new UncorrectDataError('Ошибка получения карточек') : new DefaultError('Ошибка по умолчанию')));
+    .catch((err) => next(err.name === 'ValidationError'
+      ? new UncorrectDataError('Ошибка получения карточек')
+      : new DefaultError('Ошибка по умолчанию')));
 };
 
-module.exports.createCard = (req, res, next) => {
-  const { name, link } = req.body;
+module.exports.createMovie = (req, res, next) => {
+  const {
+    country,
+    director,
+    duration,
+    year,
+    description,
+    image,
+    trailer,
+    nameRU,
+    nameEN,
+    thumbnail,
+    movieId,
+  } = req.body;
 
-  Card.create({ name, link, owner: req.user._id })
+  Movie.create(
+    {
+      country,
+      director,
+      duration,
+      year,
+      description,
+      image,
+      trailer,
+      nameRU,
+      nameEN,
+      thumbnail,
+      movieId,
+      owner: req.user._id,
+    },
+  )
     .then((card) => res.status(200).send({ data: card }))
-    .catch((err) => next(err.name === 'ValidationError' ? new UncorrectDataError('Переданы некорректные данные при создании карточки') : new DefaultError('Ошибка по умолчанию')));
+    .catch((err) => next(err.name === 'ValidationError'
+      ? new UncorrectDataError('Переданы некорректные данные при создании фильма')
+      : new DefaultError('Ошибка по умолчанию')));
 };
 
-module.exports.deleteCard = (req, res, next) => {
-  Card.findById(req.params.cardId)
-    .orFail(new Error('NoValidid'))
-    .then((card) => {
-      if (!card) next(new NotFoundError('Карточка с указанным _id не найдена'));
-      if (card.owner !== req.user._id) next(new ForbiddenError('Не совпадает автор карточки и id пользователя'));
+module.exports.deleteMovie = (req, res, next) => {
+  const { movieId } = req.params.movieId;
+  const notFoundMovieMessage = 'Фильм с указанным _id не найден';
 
-      return Card.deleteOne(req.params.cardId)
-        .orFail(next(new NotFoundError('Карточка с указанным _id не найдена')))
-        .then((deletedCard) => res.status(200).send({ data: deletedCard }));
+  Movie.findById(movieId)
+    .orFail(new Error('NoValidid'))
+    .then((movie) => {
+      if (!movie) next(new NotFoundError(notFoundMovieMessage));
+      if (movie.owner !== req.user._id) next(new ForbiddenError('Не совпадает автор фильма и id пользователя'));
+
+      return Movie.deleteOne(movieId)
+        .orFail(next(new NotFoundError(notFoundMovieMessage)))
+        .then((deletedMovie) => res.status(200).send({ data: deletedMovie }));
     })
     .catch((err) => {
       if (err.message === 'NoValidid') {
-        next(new NotFoundError('Карточка с указанным _id не найдена'));
+        next(new NotFoundError(notFoundMovieMessage));
       } else if (err.message === 'CastError') {
         next(new UncorrectDataError('Переданы некорректные данные'));
       } else {
-        next(new DefaultError('Произошла ошибка удаления карточки'));
+        next(new DefaultError('Произошла ошибка удаления фильма'));
       }
     });
 };
 
+
+
+
+
 module.exports.likeCard = (req, res, next) => {
-  Card.findByIdAndUpdate(
+  Movie.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true },
@@ -61,7 +99,7 @@ module.exports.likeCard = (req, res, next) => {
 };
 
 module.exports.dislikeCard = (req, res, next) => {
-  Card.findByIdAndUpdate(
+  Movie.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
     { new: true },
