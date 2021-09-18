@@ -4,9 +4,6 @@ const validator = require('validator');
 
 const UncorrectDataError = require('../errors/uncorrect_data_err');
 const UnauthorizedError = require('../errors/unauthorized_err');
-const NotFoundError = require('../errors/not_found_err');
-const DefaultError = require('../errors/default-err');
-const ConflictRequestError = require('../errors/conflict_request_err');
 
 const userSchema = new mongoose.Schema({
   email: {

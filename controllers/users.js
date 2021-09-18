@@ -49,7 +49,7 @@ module.exports.updateUserData = (req, res, next) => {
       if ((err.name === 'MongoError' && err.code === 11000)) {
         return next(new ConflictRequestError('Переданный email уже используется другим пользователем'));
       }
-      next(new DefaultError('Ошибка по умолчанию'));
+      return next(new DefaultError('Ошибка по умолчанию'));
     });
 };
 

@@ -10,6 +10,7 @@ const { corsHandler } = require('./middlewares/corsHandler');
 const router = require('./routes/index');
 const commonErrorHandler = require('./middlewares/commonErrorHandler');
 const { MONGO_URL, PORT = 3000 } = require('./config/config');
+const { limiter } = require('./config/rateLimiter');
 
 const app = express();
 
@@ -20,11 +21,12 @@ mongoose.connect(MONGO_URL, {
   useUnifiedTopology: true,
 });
 
+app.use(requestLogger);
+app.use(limiter);
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet());
-app.use(requestLogger);
 app.use(corsHandler);
 app.use(router);
 app.use(errorLogger);

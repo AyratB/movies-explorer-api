@@ -79,9 +79,6 @@ module.exports.deleteMovie = (req, res, next) => {
     });
 };
 
-
-
-
 module.exports.likeCard = (req, res, next) => {
   Movie.findByIdAndUpdate(
     req.params.cardId,
@@ -117,6 +114,5 @@ module.exports.dislikeCard = (req, res, next) => {
         return next(new UncorrectDataError('Переданы некорректные данные для удаления лайка'));
       }
       return next(new DefaultError('Произошла ошибка постановки удаления лайка карточки'));
-
     });
 };
