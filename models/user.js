@@ -2,6 +2,12 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const validator = require('validator');
 
+const UncorrectDataError = require('../errors/uncorrect_data_err');
+const UnauthorizedError = require('../errors/unauthorized_err');
+const NotFoundError = require('../errors/not_found_err');
+const DefaultError = require('../errors/default-err');
+const ConflictRequestError = require('../errors/conflict_request_err');
+
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -30,13 +36,13 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
     return this.findOne({ email }).select('+password')
       .then((user) => {
         if (!user) {
-          return Promise.reject(new Error('Неправильные почта или пароль'));
+          return Promise.reject(new UnauthorizedError('Неправильные почта или пароль'));
         }
 
         return bcrypt.compare(password, user.password)
           .then((matched) => {
             if (!matched) {
-              return Promise.reject(new Error('Неправильные почта или пароль'));
+              return Promise.reject(new UnauthorizedError('Неправильные почта или пароль'));
             }
 
             return user;
@@ -44,7 +50,7 @@ userSchema.statics.findUserByCredentials = function findUserByCredentials(email,
       });
   }
 
-  return Promise.reject(new Error('Пароль или email не могут быть пустыми'));
+  return Promise.reject(new UncorrectDataError('Пароль или email не могут быть пустыми'));
 };
 
 function toJSON() {

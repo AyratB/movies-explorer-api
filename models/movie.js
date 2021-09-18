@@ -16,10 +16,8 @@ const movieSchema = new mongoose.Schema({
     min: [0, 'Длительность фильма не может быть отрицательной'],
   },
   year: {
-    type: Number,
+    type: String,
     required: true,
-    min: [1895, 'Год выпуска должен быть старше 1895 года'],
-    max: [2021, 'Год выпуска должен быть меньше 2021 года'],
   },
   description: {
     type: String,
@@ -55,7 +53,7 @@ const movieSchema = new mongoose.Schema({
     required: true,
   },
   movieId: {
-    type: String, // number ?
+    type: Number,
     required: true,
   },
   nameRU: {

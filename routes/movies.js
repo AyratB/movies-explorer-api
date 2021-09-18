@@ -24,11 +24,8 @@ router.post('/', celebrate({
       .integer()
       .required()
       .min(0),
-    year: Joi.number()
-      .integer()
-      .required()
-      .min(1895)
-      .max(2021),
+    year: Joi.string()
+      .required(),
     description: Joi.string()
       .required(),
     image: Joi.string()
@@ -44,14 +41,17 @@ router.post('/', celebrate({
     thumbnail: Joi.string()
       .required()
       .custom(isUrl),
-    movieId: Joi.string() // number ?
+    movieId: Joi.number()
+      .integer()
       .required(),
   }),
 }), createMovie);
 
 router.delete('/:movieId ', celebrate({
   params: Joi.object().keys({
-    movieId: Joi.string().hex().length(24),
+    movieId: Joi.string()
+      .hex()
+      .length(24),
   }),
 }), deleteMovie);
 

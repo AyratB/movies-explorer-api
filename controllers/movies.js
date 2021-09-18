@@ -57,24 +57,27 @@ module.exports.deleteMovie = (req, res, next) => {
   Movie.findById(movieId)
     .orFail(new Error('NoValidid'))
     .then((movie) => {
-      if (!movie) next(new NotFoundError(notFoundMovieMessage));
-      if (movie.owner !== req.user._id) next(new ForbiddenError('Не совпадает автор фильма и id пользователя'));
+      if (!movie) {
+        return next(new NotFoundError(notFoundMovieMessage));
+      }
+      if (movie.owner !== req.user._id) {
+        return next(new ForbiddenError('Не совпадает автор фильма и id пользователя'));
+      }
 
       return Movie.deleteOne(movieId)
-        .orFail(next(new NotFoundError(notFoundMovieMessage)))
+        .orFail(new NotFoundError(notFoundMovieMessage))
         .then((deletedMovie) => res.status(200).send({ data: deletedMovie }));
     })
     .catch((err) => {
       if (err.message === 'NoValidid') {
-        next(new NotFoundError(notFoundMovieMessage));
-      } else if (err.message === 'CastError') {
-        next(new UncorrectDataError('Переданы некорректные данные'));
-      } else {
-        next(new DefaultError('Произошла ошибка удаления фильма'));
+        return next(new NotFoundError(notFoundMovieMessage));
       }
+      if (err.message === 'CastError') {
+        return next(new UncorrectDataError('Переданы некорректные данные'));
+      }
+      return next(new DefaultError('Произошла ошибка удаления фильма'));
     });
 };
-
 
 
 
@@ -89,12 +92,12 @@ module.exports.likeCard = (req, res, next) => {
     .then((likedCard) => res.status(200).send({ data: likedCard }))
     .catch((err) => {
       if (err.message === 'NoValidid') {
-        next(new NotFoundError('Карточка с указанным _id не найдена'));
-      } else if (err.message === 'CastError') {
-        next(new UncorrectDataError('Переданы некорректные данные для постановки лайка'));
-      } else {
-        next(new DefaultError('Произошла ошибка постановки лайка карточки'));
+        return next(new NotFoundError('Карточка с указанным _id не найдена'));
       }
+      if (err.message === 'CastError') {
+        return next(new UncorrectDataError('Переданы некорректные данные для постановки лайка'));
+      }
+      return next(new DefaultError('Произошла ошибка постановки лайка карточки'));
     });
 };
 
@@ -108,11 +111,12 @@ module.exports.dislikeCard = (req, res, next) => {
     .then((dislikedCard) => res.status(200).send({ data: dislikedCard }))
     .catch((err) => {
       if (err.message === 'NoValidid') {
-        next(new NotFoundError('Карточка с указанным _id не найдена'));
-      } else if (err.name === 'ValidationError' || err.name === 'CastError') {
-        next(new UncorrectDataError('Переданы некорректные данные для удаления лайка'));
-      } else {
-        next(new DefaultError('Произошла ошибка постановки удаления лайка карточки'));
+        return next(new NotFoundError('Карточка с указанным _id не найдена'));
       }
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        return next(new UncorrectDataError('Переданы некорректные данные для удаления лайка'));
+      }
+      return next(new DefaultError('Произошла ошибка постановки удаления лайка карточки'));
+
     });
 };

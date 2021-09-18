@@ -1,9 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
 const User = require('../models/user');
 
-const { JWT_SECRET, NODE_ENV } = process.env;
+const { JWT_SECRET } = require('../config/config');
 
 const UncorrectDataError = require('../errors/uncorrect_data_err');
 const UnauthorizedError = require('../errors/unauthorized_err');
@@ -17,21 +16,21 @@ module.exports.getCurrentUser = (req, res, next) => {
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.message === 'NoValidid') {
-        next(new NotFoundError('Пользователь по указанному _id не найден'));
-      } else if (err.message === 'CastError') {
-        next(new UncorrectDataError('Переданы некорректные данные'));
-      } else {
-        next(new DefaultError('Произошла ошибка получения данных пользователя'));
+        return next(new NotFoundError('Пользователь по указанному _id не найден'));
       }
+      if (err.message === 'CastError') {
+        return next(new UncorrectDataError('Переданы некорректные данные'));
+      }
+      return next(new DefaultError('Произошла ошибка получения данных пользователя'));
     });
 };
 
 module.exports.updateUserData = (req, res, next) => {
-  const { name, about } = req.body;
+  const { email, name } = req.body;
 
   User.findByIdAndUpdate(
     req.user._id,
-    { name, about },
+    { email, name },
     {
       new: true,
       runValidators: true,
@@ -42,12 +41,15 @@ module.exports.updateUserData = (req, res, next) => {
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.message === 'NoValidid') {
-        next(new NotFoundError('Пользователь по указанному _id не найден'));
-      } else if (err.message === 'CastError') {
-        next(new UncorrectDataError('Переданы некорректные данные при обновлении профиля'));
-      } else {
-        next(new DefaultError('Ошибка по умолчанию'));
+        return next(new NotFoundError('Пользователь по указанному _id не найден'));
       }
+      if (err.message === 'CastError') {
+        return next(new UncorrectDataError('Переданы некорректные данные при обновлении профиля'));
+      }
+      if ((err.name === 'MongoError' && err.code === 11000)) {
+        return next(new ConflictRequestError('Переданный email уже используется другим пользователем'));
+      }
+      next(new DefaultError('Ошибка по умолчанию'));
     });
 };
 
@@ -60,12 +62,12 @@ module.exports.createUser = (req, res, next) => {
     .then((user) => res.status(200).send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new UncorrectDataError('Переданы некорректные данные при создании пользователя'));
-      } else if (err.name === 'MongoError' && err.code === 11000) {
-        next(new ConflictRequestError('Попытка зарегистрироваться оп существующему email'));
-      } else {
-        next(new DefaultError('Ошибка по умолчанию'));
+        return next(new UncorrectDataError('Переданы некорректные данные при создании пользователя'));
       }
+      if (err.name === 'MongoError' && err.code === 11000) {
+        return next(new ConflictRequestError('Попытка зарегистрироваться по существующему email'));
+      }
+      return next(new DefaultError('Ошибка по умолчанию'));
     });
 };
 
@@ -77,7 +79,7 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        JWT_SECRET,
         { expiresIn: '7d' },
       );
 
@@ -92,4 +94,24 @@ module.exports.login = (req, res, next) => {
         });
     })
     .catch((err) => next(new UnauthorizedError(err.message)));
+};
+
+// выход
+module.exports.logout = (req, res, next) => {
+  res.clearCookie('jwt');
+  res.redirect('/');
+
+  next();
+
+  // II res.clearCookie('jwt', { path: '/' });
+
+  // III res.status(202).clearCookie('jwt').send('cookie cleared');
+
+  // IV return res
+  // .clearCookie("jwt")
+  // .status(200)
+  // .json({ message: "Successfully logged out" });
+
+  // V res.clearCookie('jwt');
+  // next();
 };
