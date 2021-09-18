@@ -99,6 +99,7 @@ module.exports.login = (req, res, next) => {
 // выход
 module.exports.logout = (req, res, next) => {
   res.clearCookie('jwt');
+  res.status(202).send('Произведен выход из аккаунта');
   res.redirect('/');
 
   next();

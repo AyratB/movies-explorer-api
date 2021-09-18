@@ -17,7 +17,7 @@ module.exports = (req, res, next) => {
 
     req.user = payload;
 
-    next();
+    return next();
   }
   return next(new UnauthorizedError('Доступ запрещен. Необходима авторизация'));
 };

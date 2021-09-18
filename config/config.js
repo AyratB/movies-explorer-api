@@ -8,7 +8,7 @@ const {
 } = process.env;
 
 module.exports = {
-  MONGO_URL: NODE_ENV === 'production' ? MONGO_URL : 'mongodb://localhost:27017/bitfilmsdb',
+  MONGO_URL: NODE_ENV === 'production' ? MONGO_URL : 'mongodb://localhost:27017/moviesdb',
   JWT_SECRET: NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
   PORT,
 };

@@ -51,7 +51,7 @@ module.exports.createMovie = (req, res, next) => {
 };
 
 module.exports.deleteMovie = (req, res, next) => {
-  const { movieId } = req.params.movieId;
+  const { movieId } = req.params;
   const notFoundMovieMessage = 'Фильм с указанным _id не найден';
 
   Movie.findById(movieId)
@@ -60,11 +60,11 @@ module.exports.deleteMovie = (req, res, next) => {
       if (!movie) {
         return next(new NotFoundError(notFoundMovieMessage));
       }
-      if (movie.owner !== req.user._id) {
+      if (movie.owner.toString() !== req.user._id.toString()) {
         return next(new ForbiddenError('Не совпадает автор фильма и id пользователя'));
       }
 
-      return Movie.deleteOne(movieId)
+      return Movie.findOneAndRemove(movieId)
         .orFail(new NotFoundError(notFoundMovieMessage))
         .then((deletedMovie) => res.status(200).send({ data: deletedMovie }));
     })
@@ -75,7 +75,7 @@ module.exports.deleteMovie = (req, res, next) => {
       if (err.message === 'CastError') {
         return next(new UncorrectDataError('Переданы некорректные данные'));
       }
-      return next(new DefaultError('Произошла ошибка удаления фильма'));
+      return next(new DefaultError(`Произошла ошибка удаления фильма c id = ${movieId}`));
     });
 };
 

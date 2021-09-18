@@ -7,7 +7,7 @@ const {
 
 router.get('/', getMovies);
 router.post('/', validateMovieBody, createMovie);
-router.delete('/:movieId ', validateMovieId, deleteMovie);
+router.delete('/:movieId', validateMovieId, deleteMovie);
 
 // router.put('/:cardId/likes', celebrate({
 //   params: Joi.object().keys({
