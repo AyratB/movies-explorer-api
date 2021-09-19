@@ -1,6 +1,6 @@
 const allowedCors = [
-  'https://mestopracticum.students.nomoredomains.club',
-  'http://mestopracticum.students.nomoredomains.club',
+  'https://aburnashev-movies.nomoredomains.monster',
+  'http://aburnashev-movies.nomoredomains.monster',
   'http://localhost:3000',
 ];
 
