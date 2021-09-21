@@ -6,22 +6,20 @@ const { JWT_SECRET } = require('../config/config');
 
 const UncorrectDataError = require('../errors/uncorrect_data_err');
 const UnauthorizedError = require('../errors/unauthorized_err');
-const NotFoundError = require('../errors/not_found_err');
-const DefaultError = require('../errors/default-err');
 const ConflictRequestError = require('../errors/conflict_request_err');
 
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .orFail(new Error('NoValidid'))
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.message === 'NoValidid') {
-        return next(new NotFoundError('Пользователь по указанному _id не найден'));
+        return next(new UncorrectDataError('Пользователь по указанному _id не найден'));
       }
       if (err.message === 'CastError') {
         return next(new UncorrectDataError('Переданы некорректные данные'));
       }
-      return next(new DefaultError('Произошла ошибка получения данных пользователя'));
+      return next(err);
     });
 };
 
@@ -38,10 +36,10 @@ module.exports.updateUserData = (req, res, next) => {
   )
     .where('_id').equals(req.user._id)
     .orFail(new Error('NoValidid'))
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.message === 'NoValidid') {
-        return next(new NotFoundError('Пользователь по указанному _id не найден'));
+        return next(new UncorrectDataError('Пользователь по указанному _id не найден'));
       }
       if (err.message === 'CastError') {
         return next(new UncorrectDataError('Переданы некорректные данные при обновлении профиля'));
@@ -49,17 +47,16 @@ module.exports.updateUserData = (req, res, next) => {
       if ((err.name === 'MongoError' && err.code === 11000)) {
         return next(new ConflictRequestError('Переданный email уже используется другим пользователем'));
       }
-      return next(new DefaultError('Ошибка по умолчанию'));
+      return next(err);
     });
 };
 
-// регистрация пользователя
 module.exports.createUser = (req, res, next) => {
   const { email, password, name } = req.body;
 
   bcrypt.hash(password, 10)
     .then((hash) => User.create({ email, password: hash, name }))
-    .then((user) => res.status(200).send({ data: user }))
+    .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return next(new UncorrectDataError('Переданы некорректные данные при создании пользователя'));
@@ -67,11 +64,10 @@ module.exports.createUser = (req, res, next) => {
       if (err.name === 'MongoError' && err.code === 11000) {
         return next(new ConflictRequestError('Попытка зарегистрироваться по существующему email'));
       }
-      return next(new DefaultError('Ошибка по умолчанию'));
+      return next(err);
     });
 };
 
-// вход
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
@@ -96,7 +92,6 @@ module.exports.login = (req, res, next) => {
     .catch((err) => next(new UnauthorizedError(err.message)));
 };
 
-// выход
 module.exports.logout = (req, res, next) => {
   res.clearCookie('jwt');
   res.status(202).send('Произведен выход из аккаунта');

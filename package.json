@@ -1,6 +1,7 @@
 {
     "name": "diploma-api",
     "author": "Ayrat Burnashev",
+    "description": "Yandex diploma project",
     "devDependencies": {
         "eslint": "^7.2.0",
         "eslint-config-airbnb-base": "^14.2.1",
