@@ -112,12 +112,14 @@ const validateUserBody = celebrate(
 const validateMovieId = celebrate(
   {
     params: Joi.object().keys({
-      movieId: Joi.string()
-        .hex()
-        .length(24)
+      movieId: Joi
+        .number()
+        .integer()
+        .required()
+        .min(0)
         .message('Поле "movieId" должно быть валидным Id фильма')
         .messages({
-          'string.required': 'Поле "email" должно быть 24-буквенным',
+          'string.required': 'Поле "movieId" должно быть больше 0',
         }),
     }),
   },

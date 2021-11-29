@@ -2,7 +2,6 @@ const Movie = require('../models/movie');
 
 const UncorrectDataError = require('../errors/uncorrect_data_err');
 const NotFoundError = require('../errors/not_found_err');
-const ForbiddenError = require('../errors/forbidden_err');
 
 module.exports.getMovies = (req, res, next) => {
   Movie.find({})
@@ -46,23 +45,9 @@ module.exports.createMovie = (req, res, next) => {
 };
 
 module.exports.deleteMovie = (req, res, next) => {
-  const { movieId } = req.params;
-  const notFoundMovieMessage = 'Фильм с указанным _id не найден';
-
-  Movie.findById(movieId)
-    .orFail(new NotFoundError(notFoundMovieMessage))
-    .then((movie) => {
-      if (!movie) {
-        return next(new NotFoundError(notFoundMovieMessage));
-      }
-      if (movie.owner.toString() !== req.user._id.toString()) {
-        return next(new ForbiddenError('Не совпадает автор фильма и id пользователя'));
-      }
-
-      return Movie.findOneAndRemove(movieId)
-        .orFail(new NotFoundError(notFoundMovieMessage))
-        .then((deletedMovie) => res.send({ data: deletedMovie }));
-    })
+  Movie.findOneAndDelete(req.params.movieId)
+    .orFail(new NotFoundError('Фильм с указанным _id не найден'))
+    .then((deletedMovie) => res.send({ data: deletedMovie }))
     .catch((err) => {
       if (err.message === 'CastError') {
         return next(new UncorrectDataError('Переданы некорректные данные'));
