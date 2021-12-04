@@ -4,8 +4,8 @@ const UncorrectDataError = require('../errors/uncorrect_data_err');
 const NotFoundError = require('../errors/not_found_err');
 
 module.exports.getMovies = (req, res, next) => {
-  Movie.find({})
-    .then((cards) => res.send({ data: cards }))
+  Movie.find({ owner: { _id: req.user._id } })
+    .then((movies) => res.send({ data: movies }))
     .catch((err) => next(err));
 };
 
