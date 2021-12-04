@@ -87,6 +87,7 @@ module.exports.login = (req, res, next) => {
         .send({
           message: 'Логин прошел успешно',
           token,
+          user,
         });
     })
     .catch((err) => next(new UnauthorizedError(err.message)));
