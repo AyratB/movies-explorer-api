@@ -11,7 +11,7 @@
     "scripts": {
         "lint": "npx eslint .",
         "dev": "nodemon app.js",
-        "start": "node app.js"
+        "start": "node --inspect app.js"
     },
     "dependencies": {
         "bcryptjs": "^2.4.3",
