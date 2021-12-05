@@ -2,6 +2,7 @@ const allowedCors = [
   'https://aburnashev-movies.nomoredomains.monster',
   'http://aburnashev-movies.nomoredomains.monster',
   'http://localhost:3000',
+  'https://localhost:3000',
 ];
 
 const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
