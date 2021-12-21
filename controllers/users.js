@@ -80,11 +80,6 @@ module.exports.login = (req, res, next) => {
       );
 
       res
-        .cookie('jwt', token, {
-          maxAge: 3600000 * 24 * 7,
-          httpOnly: true,
-          secure: 'false',
-        })
         .send({
           message: 'Логин прошел успешно',
           token,
@@ -95,7 +90,7 @@ module.exports.login = (req, res, next) => {
 };
 
 module.exports.logout = (req, res, next) => {
-  res.clearCookie('jwt');
+  // res.clearCookie('jwt');
   res.status(202).send('Произведен выход из аккаунта');
   res.redirect('/');
 
