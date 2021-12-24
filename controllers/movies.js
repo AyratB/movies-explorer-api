@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Movie = require('../models/movie');
 
 const UncorrectDataError = require('../errors/uncorrect_data_err');
@@ -45,13 +46,23 @@ module.exports.createMovie = (req, res, next) => {
 };
 
 module.exports.deleteMovie = (req, res, next) => {
-  Movie.findOneAndDelete(req.params.movieId)
-    .orFail(new NotFoundError('Фильм с указанным _id не найден'))
-    .then((deletedMovie) => res.send({ data: deletedMovie }))
+  Movie.findOne({ movieId: req.params.movieId })
+    .where('owner').equals(new mongoose.Types.ObjectId(req.user._id))
+    .orFail(new NotFoundError('Указанный фильм не найден'))
+    .then((movie) => {
+      if (!movie) return next(new NotFoundError('Указанный фильм не найден'));
+
+      return Movie.deleteOne({ movieId: req.params.movieId })
+        .orFail(new NotFoundError('Указанный фильм не найден'))
+        .then((deletedMovie) => res.status(200).send({ data: deletedMovie }));
+    })
     .catch((err) => {
+      if (err.message === 'NoValidid') {
+        return next(new NotFoundError('Фильм с указанным _id не найдена'));
+      }
       if (err.message === 'CastError') {
         return next(new UncorrectDataError('Переданы некорректные данные'));
       }
-      return next(err);
+      return next(new Error('Произошла ошибка удаления'));
     });
 };
