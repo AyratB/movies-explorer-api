@@ -9,9 +9,10 @@
         "nodemon": "^2.0.12"
     },
     "scripts": {
-        "lint": "npx eslint .",
+        "lint": "npx eslint --fix .",
         "dev": "nodemon app.js",
-        "start": "node --inspect app.js"
+        "start": "node app.js",
+        "local-start": "set PORT=3006 && node --inspect app.js"
     },
     "dependencies": {
         "bcryptjs": "^2.4.3",
